@@ -12,9 +12,10 @@
 
 \begin{abstract}
 
-    This paper presents an $\alpha-\beta$ game engine with a simple Monte-Carlo
-    heuristic for the game of Hex. A sample implementation was written and is
-    attached in the appendix. Other approaches and heuristics are discussed and
+    This paper presents an $\alpha-\beta$ game engine with a simple
+    Monte-Carlo heuristic for the game of Hex. A sample implementation
+    was written and is attached in the appendix. The mathematical
+    background, other approaches, and heuristics are discussed and
     compared.
 
 \end{abstract}
@@ -29,6 +30,9 @@ history of the game.
 Next, is a walk-though of the interesting portions of the code: The $\alpha-\beta$
 routine, the child search, and the evaluation heuristic used.
 
+Other heuristic options will be briefly looked at, then a description
+of possible future work on this code base.
+
 \section{The Game}
 
 The game is played on a rhombus board made of hexagons:
@@ -36,16 +40,16 @@ The game is played on a rhombus board made of hexagons:
 \begin{HexBoard}[board size=5]
 \end{HexBoard}
 
-The standard size for game play is 11x11.  This is a turn based game. Each turn
+The standard size for game play is 11x11.  This is a turn based game. Each turn,
 the player gets to occupy one new currently unoccupied location. The object for
 each player is to connect the two sides of the player's color by occupying a
 connecting set of locations to form a chain \cite{Maarup05}.
 
-Because the first player has a distinct advantage, some versions of the game
-have a \emph{swap rule}. If the swap rule is in effect, the second player can
-swap places with the first player right after the first player makes his first
-move. This forces the first player to make an inferior first move or play at a
-disadvantage.
+Because the first player has a distinct advantage, some versions of
+the game have a \emph{swap rule}. If the swap rule is in effect, the
+second player can swap places with the first player right after the
+first player makes his first move. This forces the first player to
+make a less than optimal first move or play at a disadvantage.
 
 In the task environment classification scheme used in \cite{RN:AIAMA:2003}, Hex
 is a fully observable, multi-agent, deterministic, sequential, static, discrete
@@ -85,12 +89,27 @@ method quite as simple as those described above would be very useful for most
 military applications.
 \end{quote}
 
-In 1953 Parker Brothers released Hex as a board game. Unfortunately it is
-currently out of print. Hugo Piet Hein, son of Piet Hein, has a little company
-that is selling Hex boards today \footnote{\url{http://www.hexboard.com/}}.
+Before moving on, I'd like to point out how cool it is that the
+creators of Game Theory (Nash) and Information Theory (Shannon)
+collaborated to create a very passable AI program, several years
+before AI existed as a separate discipline, using little more than
+plug-board, a volt meter, and a box of resistors. From \cite{Nash:1952:Games}:
 
-Hex has appeared several times in the Computer Olympiads between 2000 and 2011.
-The last computer champion was MoHex in 2011 \cite{Henderson:2010}.
+\begin{quote}
+Shannon reports that in their experience the machine has never been
+beaten if given the first move. But its infallibility has not been
+proved.
+\end{quote}  
+
+
+In 1953 Parker Brothers released Hex as a board game. Unfortunately it
+is currently out of print. Hugo Piet Hein, son of Piet Hein, has a
+little company that is selling Hex boards
+today \footnote{\url{http://www.hexboard.com/}}.
+
+Hex has appeared several times in the Computer Olympiads between 2000
+and 2011.  The last computer champion was MoHex in 2011
+\cite{Henderson:2010}.
 
 \section{Math}
 
@@ -131,14 +150,17 @@ player could win. The first player could place one piece then play as the second
 player to win. This contradicts the second player winning, so with perfect play
 the first player must win.
 
-In terms of time, the best known algorithms for solving Hex are intractable (no
-polynomial time solution). However, in terms of space, if we had an oracle to
-tell us if a position was winnable by white, we could save the perfect play game
-tree in polynomial space.  In computational complexity theory, PSPACE is the set
-of decision problems that can be solved in a polynomial amount of space. It
-turns out that Hex is not only a PSPACE problem, but was shown in 1981 to be
-PSPACE complete \cite{Reisch1981}. This means that any other PSPACE problem can
-be reduced in polynomial time to an equivalent Hex game of some size.
+In terms of time, the best known algorithms for solving Hex are
+intractable (no polynomial time solution). However, in terms of space,
+if we had an oracle to tell us if a position was winnable by white, we
+could save the perfect play game tree in polynomial space.  In
+computational complexity theory, PSPACE is the set of decision
+problems that can be solved in a polynomial amount of space. It turns
+out that Hex is not only a PSPACE problem, but was shown in 1981 to be
+PSPACE complete \cite{Reisch1981}. This means that any other PSPACE
+problem can be reduced in polynomial time to an equivalent Hex game of
+some size. As $\mathcal{NP}\subseteq $ PSPACE, a good Hex playing
+program at least theoretically has other significant uses.
 
 
 \section{The Program}
@@ -230,8 +252,8 @@ alpha_beta_value alpha_beta(int depth,
 
 The \texttt{find\_children} implementation is in listing \ref{lst:fc}.
 
-Like the game Go, Hex can have a very large branching factor. On an NxN board,
-the branch factor starts at $N^2$ and decreases by 1 for each move.
+Like the game Go, Hex can have a very large branching factor. On an n$\times$n board,
+the branching factor starts at $n^2$ and decreases by 1 for each move.
 
 The branching factor for searching is set by the global \texttt{branch\_factor},
 which I justify because it is set just once at program startup.
@@ -401,7 +423,7 @@ the human player is usually enough to cause a loss.:
 
 \section{Other Heuristics}
 
-The traditional heuristic is that resistance netowork used by Shannon. It may
+The traditional heuristic is that resistance network used by Shannon. It may
 however  be a bit harder to implement in software than in hardware. While
 writing the code for this project, I looked at the source code for Wolve, which
 was the 2008 Computer Olympiad winner for Hex. When more advanced searches and
@@ -448,25 +470,27 @@ equations. Added to the $|V|$ equations we generated from the current law, we
 have the required $|E|+1$ linearly independent equations to solve the resistance
 network.
 
-With an NxN Hex board plus the required source and sink, there are a total of
-$3\times(N-1)^2+2N-1 + 2N$ edges. For the standard 11x11 board, that would
-require solving a system of 343 linearly independent equations. This is not a
-trivial amount of work for evaluating a single position.
+With an n$\times$n Hex board plus the required source and sink, there
+are a total of $3\times(n-1)^2+2n-1 + 2n$ edges. For the standard
+11x11 board, that would require solving a system of 343 linearly
+independent equations. This is not a trivial amount of work for
+evaluating a single position.
 
 \cite{ANSHELEVICH2002101} describes a heuristic that finds cell-to-cell loose
 linkages that work better than straight-forward resistance heuristics. Here is
-an example:
+the simplest example:
 
 \begin{HexBoard}[board size=5]
 \HStoneGroup[color=black]{b2,c3}
 \end{HexBoard}
 
 The stones at b2 and c3 are linked in that if white tries to block the
-connection by placing at either b3 or c2, black can play the other location to
-complete the link. The pattern matching for these linkages has become called
-H-search. H-search is the primary heuristic used by Six, Wolve, and MoHex, which
-were the winners of the Computer Olympiad Hex competitions from 2006 through
-2010.
+connection by placing at either b3 or c2, black can play the other
+location to complete the link. The pattern matching for these linkages
+has become called H-search. H-search, with various amounts of pattern
+matching, is the primary heuristic used by Six, Wolve, and MoHex,
+which were the winners of the Computer Olympiad Hex competitions from
+2006 through 2010.
 
 Monte-Carlo has been used in conjunction with $\alpha-\beta$
 \cite{arneson_hayward_henderson_2010}, but it is normally used for either
@@ -498,6 +522,15 @@ year, I may try my hand at using a neural network for the heuristic function.
 
 \section{Future Work}
 
+From an engineering standpoint, the code wasn't written to
+scale. Everything is in a single module and the classes are statically
+defined.  In order to scale and add improvements, the code will need
+to be modularized. The main class interfaces need to be re-thought
+out, and heuristics functions should be either virtual and
+polymorphized, or passed as function pointers or as function object
+references.  The current code is appropriate for the single use case of
+supporting this paper.
+
 Obviously, the game needs a GUI. The code is C++ and I work on Linux, so I think
 a Qt GUI \cite {Blanchette:2006} would work well. Qt is a C++ GUI framework that
 is portable to Linux, Mac, Windows and Android.
@@ -521,20 +554,26 @@ picking the search depth and branching factor.
 Other heuristic functions, such as network resistance, edge current, or neural
 network evaluation should be tried.
 
-To test one heuristic against another, a way should be added for two programs to
-play each other.
+To test one heuristic against another, a protocol should be added for
+two programs to play each other. A socket interface would allow a
+competition across machines.
+
+With a few of the above code changes, the Hex code would be a good
+base to add the modern neural network based heuristics used in the
+championship Go programs.
 
 \section{Conclusion}
 
-A basic game engine for Hex can be written in just a couple of hundred lines of
-code and can play a decent game. If AI is defined as stuff we don't really know
-how to get a computer to do yet, then at this level Hex is more of an
-engineering or coding problem than an AI problem.
+A basic game engine for Hex can be written in just a couple of hundred
+lines of code and can play a decent game. The structure and regularity
+makes Hex a good game for AI modeling.
 
-
+A simple heuristic that plays Hex well can be coded up in a dozen
+lines, however a full deep-learning self-training neural network is
+still a Ph.D. level project that could take months to explore. 
 
 \bibliographystyle{apalike}
-\bibliography{csphd}
+\bibliography{ai}
 \appendix
 \section{Code Listing}
 
